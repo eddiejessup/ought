@@ -1,117 +1,66 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
+<meta charset='utf-8'>
 <style>
+  .node {
+    stroke: #fff;
+    stroke-width: 1.5px;
+  }
 
-.node {
-  stroke: #fff;
-  stroke-width: 1.5px;
-}
-
-.link {
-  stroke: #999;
-  stroke-opacity: .6;
-}
-
+  .link {
+    stroke: #999;
+    stroke-opacity: .6;
+  }
 </style>
 
 <body>
-<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script>
+  <svg height='800' width='1200'>
+  </svg>
 
-domain = "http://localhost:5000"
+  <button type='button' id='pause'>Play</button>
+  <button type='button' id='reset'>Reset</button>
+  x: <input type='text' name='x' id='x'>
+  y: <input type='text' name='y' id='y'>
+  <button type='button' id='create'>Create</button>
 
-var width = 1200,
-    height = 800;
+  <script src='//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js'></script>
+  <script src='https://code.jquery.com/jquery-2.1.4.min.js'></script>
+  <script src='draw.js'></script>
+  <script>
+    $(document).ready(function() {
+      var pauseTime = 500;
 
-var color = d3.scale.category10();
+      function startIteration() {
+        interval = setInterval(function() {
+            graph.iterate();
+            graph.render();
+        }, pauseTime);
+      }
 
-var force = d3.layout.force()
-    .charge(-120)
-    .linkDistance(10)
-    .size([width, height]);
+      function toggleIteration() {
+        if (isPlaying) {
+          clearInterval(interval);
+          isPlaying = false;
+          $('#Pause').text('Play');
+        } else {
+          startIteration();
+          isPlaying = true;
+          $('#Pause').text('Pause');
+        }
+      }
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
+      function createGraph() {
+        x = $('#x').val();
+        y = $('#y').val();
+        graph.clear();
+        graph.create(x, y);
+        graph.render();
+      }
 
+      $('#pause').on('click', toggleIteration);
+      $('#reset').on('click', createGraph);
+      $('#create').on('click', createGraph);
 
-function getGraphDescription(callback) {
-  $.ajax({
-    method: "GET",
-    url: domain,
-    dataType: "json",
-    crossDomain: true
-  }).done(callback);
-}
-
-function createGraph(x, y, callback) {
-  $.ajax({
-      method: "GET",
-      url: domain + '/create/' + x + ',' + y,
-      dataType: "text",
-      crossDomain: true
-    }).done(callback);
-}
-
-function iterateGraph(callback) {
-  $.ajax({
-    method: "GET",
-    url: domain + '/iterate',
-    dataType: "text",
-    crossDomain: true
-  }).done(callback);
-}
-
-function renderGraphVis(graph) {  
-    force
-      .nodes(graph.nodes)
-      .links(graph.links)
-      .start();
-
-    var link = svg.selectAll(".link")
-      .data(graph.links)
-      .enter().append("line")
-      .attr("class", "link");
-
-    var node = svg.selectAll(".node")
-      .data(graph.nodes)
-      .enter().append("circle")
-                .attr("class", "node")
-                .attr("r", 5)
-                .style("fill", function(d) {
-                    return color(d.state);
-                })
-                .call(force.drag);
-
-    node.append("title")
-      .text(function(d) { return d.name; });
-
-    force.on("tick", function() {
-      link.attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; });
-
-      node.attr("cx", function(d) { return d.x; })
-          .attr("cy", function(d) { return d.y; });
+      var isPlaying = false;
     });
-}
-
-function updateGraphVis(graph) {
-  svg.selectAll(".node")
-    .style("fill", function(d, i) {
-        return color(graph.nodes[i].state);
-    });
-}
-
-$(document).ready(function() {
-  createGraph(15, 15, function() { console.log('Created'); });
-  getGraphDescription(renderGraphVis);
-  setInterval(function() {
-    iterateGraph(function() { console.log('Iterated'); });
-    getGraphDescription(updateGraphVis);
-  }, 500);
-});
-
-</script>
+  </script>
+</body>
