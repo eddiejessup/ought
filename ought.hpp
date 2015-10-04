@@ -71,6 +71,7 @@ class Network {
         vector<shared_ptr<Node>> nodes;
 
     public:
+        Network(string json);
         Network(vector<shared_ptr<Node>> nodes);
         Network(int n_x, int n_y);
         auto get_names() const;

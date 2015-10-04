@@ -3,6 +3,7 @@
 
 BOOST_PYTHON_MODULE(ought_ext) {
     boost::python::class_<Network>("Network", boost::python::init<int, int>())
+        .def(boost::python::init<std::string>())
         .def("iterate", &Network::iterate)
         .def("to_string", &Network::to_string)
         .def("to_json", &Network::to_json)

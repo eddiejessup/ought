@@ -274,6 +274,26 @@ void Node::iterate() {
     this->state.iterate(this->get_friend_states());
 }
 
+Network::Network(string json) {
+    rapidjson::Document jsonDoc;
+    jsonDoc.Parse(json.c_str());
+    // Rapidjson does not support range expressions
+    const rapidjson::Value& nodes_json = jsonDoc["nodes"];
+    for (rapidjson::SizeType i = 0; i < nodes_json.Size(); i++) {
+        string name = nodes_json[i]["name"].GetString();
+        int state_label = nodes_json[i]["state"].GetInt();
+        State state { state_label };
+        shared_ptr<Node> node {new Node {name, state}};
+        nodes.push_back(node);
+    }
+    const rapidjson::Value& links_json = jsonDoc["links"];
+    for (rapidjson::SizeType i = 0; i < links_json.Size(); i++) {
+        int source = links_json[i]["source"].GetInt();
+        int target = links_json[i]["target"].GetInt();
+        nodes[source]->add_friend(nodes[target]);
+    }
+}
+
 Network::Network(vector<shared_ptr<Node>> nodes) {
     this->nodes = nodes;
 }
