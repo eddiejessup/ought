@@ -17,11 +17,10 @@ def _get_network():
     if 'network' in state:
         return state['network']
     elif 'network' in db:
-            json = db.get('network')
-            print(type(json))
-            network = ought_ext.Network(json)
-            state['network'] = network
-            return network
+        json = db.get('network')
+        network = ought_ext.Network(json)
+        state['network'] = network
+        return network
     else:
         return None
 
@@ -47,6 +46,7 @@ def create(x, y):
 def iterate():
     _get_network().iterate()
     return 'Network iterated successfully'
+
 
 if __name__ == "__main__":
     app.run()

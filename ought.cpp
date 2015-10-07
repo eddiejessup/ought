@@ -220,7 +220,7 @@ string Network::to_json() const {
     for (int node_index = 0; node_index != this->nodes.size(); ++node_index) {
         rapidjson::Value objValue;
         objValue.SetObject();
-        auto node = this->nodes[node_index]; 
+        auto node = this->nodes[node_index];
 
         rapidjson::Value name_key("name", jsonDoc.GetAllocator());
         rapidjson::Value name_val(node->get_name().c_str(), jsonDoc.GetAllocator());

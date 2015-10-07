@@ -1,4 +1,5 @@
 class Network(object):
+
     def __init__(self, nodes):
         self.nodes = nodes
 
