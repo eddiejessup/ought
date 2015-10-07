@@ -1,64 +1,20 @@
 #include "ought.hpp"
+#include <vector>
+#include <string>
+#include <iostream>
+#include <stdexcept>
+#include <sstream>
+#include "rapidjson/writer.h"
+#include "rapidjson/document.h"
+#include "vector_format.hpp"
+
+using std::vector;
+using std::string;
+using std::shared_ptr;
 
 template<typename T>
 auto index_of(const T& item, vector<T> v) {
     return std::distance(v.begin(), std::find(v.begin(), v.end(), item));
-}
-
-template<typename T>
-string object_vector_to_string(const vector<T>& v) {
-    std::stringstream str;
-    str << "[ ";
-    for (auto i = 0; i != v.size(); ++i) {
-        if (i > 0) {
-            str << ", ";
-        }
-        str << v[i].to_string();
-    }
-    str << " ]";
-    return str.str();
-}
-
-template<typename T>
-string string_vector_to_string(const vector<T>& v) {
-    std::stringstream str;
-    str << "[ ";
-    for (auto i = 0; i != v.size(); ++i) {
-        if (i > 0) {
-            str << ", ";
-        }
-        str << v[i];
-    }
-    str << " ]";
-    return str.str();
-}
-
-template<typename T>
-string pointer_vector_to_string(const vector<T>& v) {
-    std::stringstream str;
-    str << "[ ";
-    for (auto i = 0; i != v.size(); ++i) {
-        if (i > 0) {
-            str << ", ";
-        }
-        str << v[i]->to_string();
-    }
-    str << " ]";
-    return str.str();
-}
-
-template<typename T>
-string primitive_vector_to_string(const vector<T>& v) {
-    std::stringstream str;
-    str << "[ ";
-    for (auto i = 0; i != v.size(); ++i) {
-        if (i > 0) {
-            str << ", ";
-        }
-        str << std::to_string(v[i]);
-    }
-    str << " ]";
-    return str.str();
 }
 
 vector<vector<int>> get_bit_array(int nX, int nY) {
@@ -254,7 +210,7 @@ auto Node::to_string() const {
         friend_names.push_back(friend_ref->name);
     }
     std::stringstream str;
-    str << "Node(name=" << this->name << ", state=" << this->state.to_string() << ", friends=" << ::string_vector_to_string(friend_names) << ")";
+    str << "Node(name=" << this->name << ", state=" << this->state.to_string() << ", friends=" << ::to_string(friend_names) << ")";
     return str.str();
 }
 
@@ -372,7 +328,7 @@ string Network::to_json() const {
 
 string Network::to_string() const {
     std::stringstream str;
-    str << "Network(nodes=" << ::pointer_vector_to_string(this->nodes) << ")";
+    str << "Network(nodes=" << ::pointers_to_string(this->nodes) << ")";
     return str.str();
 }
 
