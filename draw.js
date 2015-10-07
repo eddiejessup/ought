@@ -1,5 +1,4 @@
 /*global $, jQuery, d3*/
-/* jshint browser:true, jquery:true */
 
 var graph = (function () {
   var domain = "http://localhost:5000";
