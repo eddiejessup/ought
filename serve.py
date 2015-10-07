@@ -1,8 +1,10 @@
+import json
+import numpy as np
 import flask
-import ought_ext
 from flask.ext.cors import CORS
 import redis
-
+import ought_ext
+import graph_algs
 
 db = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -37,7 +39,11 @@ def describe():
 
 @app.route("/create/<int:x>,<int:y>")
 def create(x, y):
-    network = ought_ext.Network(x, y)
+    initial_state = np.random.randint(0, 2, size=[x, y])
+    nx_graph = graph_algs.get_periodic_two_dim_lattice(initial_state)
+    data = graph_algs.nx_to_d3(nx_graph)
+    data_json = json.dumps(data)
+    network = ought_ext.Network(data_json)
     _set_network(network)
     return 'Network created successfully'
 
