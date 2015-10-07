@@ -3,6 +3,9 @@
 var graph = (function () {
   var domain = "http://localhost:5000";
   var color = d3.scale.category10();
+  var circleRadius = 10;
+  var charge = -240;
+  var linkDistance = 10;
 
   function _getGraphData(callback) {
     $.ajax({
@@ -21,8 +24,8 @@ var graph = (function () {
       var height = svg.attr("height");
 
       var force = d3.layout.force()
-        .charge(-120)
-        .linkDistance(10)
+        .charge(charge)
+        .linkDistance(linkDistance)
         .size([width, height]);
 
       force.nodes(graphData.nodes).links(graphData.links).start();
@@ -38,7 +41,7 @@ var graph = (function () {
         .enter()
         .append("circle")
         .attr("class", "node")
-        .attr("r", 5)
+        .attr("r", circleRadius)
         .style("fill", function (d) {
           return color(d.state);
         })
