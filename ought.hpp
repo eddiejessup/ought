@@ -53,14 +53,10 @@ class Network {
     public:
         Network(std::string json);
         Network(std::vector<std::shared_ptr<Node>> nodes);
-        Network(int n_x, int n_y);
         auto get_names() const;
         std::string to_json() const;
         std::string to_string() const;
         void iterate();
 };
 
-vector<vector<int>> get_bit_array(int nX, int nY);
-auto get_i_x_y(const int i_x, const int i_y, const int n_y);
-vector<shared_ptr<Node>> get_periodic_two_dim_lattice(const vector<vector<int>> initial_state);
 #endif /* OUGHT_HPP */

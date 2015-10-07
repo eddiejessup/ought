@@ -17,58 +17,6 @@ auto index_of(const T& item, vector<T> v) {
     return std::distance(v.begin(), std::find(v.begin(), v.end(), item));
 }
 
-vector<vector<int>> get_bit_array(int nX, int nY) {
-    vector<vector<int>> bits;
-    for (int iX = 0; iX < nX; ++iX) {
-        bits.push_back(vector<int> {});
-        for (int iY = 0; iY < nY; ++iY) {
-            bits[iX].push_back(1);
-        }
-    }
-    return bits;
-}
-
-auto get_i_x_y(const int i_x, const int i_y, const int n_y) {
-    return i_y + i_x * n_y;
-}
-
-vector<shared_ptr<Node>> get_periodic_two_dim_lattice(const vector<vector<int>> initial_state) {
-    auto n_x = initial_state.size();
-    auto n_y = initial_state[0].size();
-
-    vector<shared_ptr<Node>> nodes {n_x * n_y};
-
-    for (int i_x = 0; i_x < n_x; ++i_x) {
-        for (int i_y = 0; i_y < n_y; ++i_y) {
-            string name = "(" + std::to_string(i_x) + ", " + std::to_string(i_y) + ")";
-            State state {initial_state[i_x][i_y]};
-            shared_ptr<Node> node {new Node {name, state}};
-            auto i_x_y = get_i_x_y(i_x, i_y, n_y);
-            nodes[i_x_y] = node;
-        }
-    }
-    for (int i_x = 0; i_x < n_x; ++i_x) {
-        auto i_x_up = (i_x < n_x - 1) ? i_x + 1 : 0;
-        auto i_x_down = (i_x > 0) ? i_x - 1 : n_x - 1;
-        for (int i_y = 0; i_y < n_y; ++i_y) {
-            auto i_y_up = (i_y < n_y - 1) ? i_y + 1 : 0;
-            auto i_y_down = (i_y > 0) ? i_y - 1 : n_y - 1;
-
-            auto node = nodes[get_i_x_y(i_x, i_y, n_y)];
-
-            node->add_friend(nodes[get_i_x_y(i_x_up, i_y, n_y)]);
-            node->add_friend(nodes[get_i_x_y(i_x_down, i_y, n_y)]);
-            node->add_friend(nodes[get_i_x_y(i_x, i_y_up, n_y)]);
-            node->add_friend(nodes[get_i_x_y(i_x, i_y_down, n_y)]);
-            node->add_friend(nodes[get_i_x_y(i_x_up, i_y_up, n_y)]);
-            node->add_friend(nodes[get_i_x_y(i_x_up, i_y_down, n_y)]);
-            node->add_friend(nodes[get_i_x_y(i_x_down, i_y_up, n_y)]);
-            node->add_friend(nodes[get_i_x_y(i_x_down, i_y_down, n_y)]);
-        }
-    }
-    return nodes;
-}
-
 State::State() {
     }
 
@@ -252,11 +200,6 @@ Network::Network(string json) {
 
 Network::Network(vector<shared_ptr<Node>> nodes) {
     this->nodes = nodes;
-}
-
-Network::Network(int n_x, int n_y) {
-    vector<vector<int>> bits = get_bit_array(n_x, n_y);
-    this->nodes = get_periodic_two_dim_lattice(bits);
 }
 
 auto Network::get_names() const {
