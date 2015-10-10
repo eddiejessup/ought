@@ -6,7 +6,7 @@ def get_i_x_y(i_x, i_y, n_y):
     return i_y + i_x * n_y
 
 
-def get_periodic_two_dim_lattice(initial_state):
+def get_periodic_two_dim_square_lattice(initial_state):
     n_x, n_y = initial_state.shape
 
     g = nx.DiGraph()
@@ -32,6 +32,57 @@ def get_periodic_two_dim_lattice(initial_state):
             g.add_edge(i_source_node, get_i_x_y(i_x_up, i_y_down, n_y))
             g.add_edge(i_source_node, get_i_x_y(i_x_down, i_y_up, n_y))
             g.add_edge(i_source_node, get_i_x_y(i_x_down, i_y_down, n_y))
+    return g
+
+
+def get_periodic_two_dim_hex_lattice(initial_state):
+    n_x, n_y = initial_state.shape
+
+    disps = (
+        (0, 2),
+        (0, 1),
+        (1, 1),
+        (1, 0),
+        (1, -1),
+        (0, -1),
+        (0, -2),
+        (-1, -2),
+        (-1, -1),
+        (-1, 0),
+        (-1, 1),
+        (-1, 2),
+    )
+
+    flip = False
+    g = nx.DiGraph()
+    for i_x in range(n_x):
+        for i_y in range(n_y):
+            state = initial_state[i_x, i_y]
+            g.add_node((i_x, i_y), state=state, name=(i_x, i_y))
+
+    for i_x in range(n_x):
+        for i_y in range(n_y):
+            flip = not flip
+            for di, dj in disps:
+                if flip:
+                    di *= -1
+                i_x_d = i_x + di
+                i_y_d = i_y + dj
+                if i_x_d > n_x - 1:
+                    i_x_d -= n_x
+                    # continue
+                elif i_x_d < 0:
+                    i_x_d += n_x
+                    # continue
+                if i_y_d > n_y - 1:
+                    i_y_d -= n_y
+                    # continue
+                elif i_y_d < 0:
+                    i_y_d += n_y
+                    # continue
+                g.add_edge((i_x, i_y), (i_x_d, i_y_d))
+    for n, d in g.nodes(data=True):
+        print(n, d)
     return g
 
 
