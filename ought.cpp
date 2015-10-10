@@ -286,3 +286,9 @@ void Network::iterate() {
         node->uncache();
     }
 }
+
+void Network::iterate(int n) {
+    for (int i=0; i<n; ++i) {
+        this->iterate();
+    }
+}

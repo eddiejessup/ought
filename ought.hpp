@@ -57,6 +57,7 @@ class Network {
         std::string to_json() const;
         std::string to_string() const;
         void iterate();
+        void iterate(int n);
 };
 
 #endif /* OUGHT_HPP */
