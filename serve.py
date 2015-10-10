@@ -1,3 +1,4 @@
+from __future__ import print_function, division
 import json
 import numpy as np
 import flask
