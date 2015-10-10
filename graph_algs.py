@@ -8,7 +8,7 @@ def get_i_x_y(i_x, i_y, n_y):
 def get_periodic_two_dim_lattice(initial_state):
     n_x, n_y = initial_state.shape
 
-    g = nx.Graph()
+    g = nx.DiGraph()
 
     for i_x in range(n_x):
         for i_y in range(n_y):
