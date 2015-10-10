@@ -1,15 +1,16 @@
-/*global $, jQuery, d3, graph */
+/*global $, jQuery, d3, graphApi, graphDrawForce */
 
 $(document).ready(function() {
   var defaultPauseTime = 100;
   var interval;
+  var graphDraw = graphDrawForce;
 
   function startIteration() {
     var pauseTime = $('#step').val() || defaultPauseTime;
     console.log(pauseTime);
     interval = setInterval(function() {
-      graph.iterate();
-      graph.render();
+      graphApi.iterate();
+      graphDraw.render();
     }, pauseTime);
   }
 
@@ -28,9 +29,9 @@ $(document).ready(function() {
   function createGraph() {
     var x = $('#x').val();
     var y = $('#y').val();
-    graph.clear();
-    graph.create(x, y);
-    graph.render();
+    graphApi.create(x, y);
+    graphDraw.clear();
+    graphDraw.render();
   }
 
   $('#pause').on('click', toggleIteration);

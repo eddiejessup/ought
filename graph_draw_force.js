@@ -1,21 +1,10 @@
-/*global $, jQuery, d3*/
+/*global $, jQuery, d3, graphApi*/
 
-var graph = (function () {
-  var domain = "http://localhost:5000";
+var graphDrawForce = (function () {
   var color = d3.scale.category10();
-  var circleRadius = 10;
-  var charge = -240;
+  var circleRadius = 5;
+  var charge = -180;
   var linkDistance = 10;
-
-  function _getGraphData(callback) {
-    $.ajax({
-      context: this.graph,
-      method: "GET",
-      url: domain,
-      dataType: "json",
-      crossDomain: true
-    }).done(callback);
-  }
 
   function render() {
     var renderInitial = function (graphData) {
@@ -76,35 +65,15 @@ var graph = (function () {
     } else {
       renderFunc = renderInitial;
     }
-    _getGraphData(renderFunc);
+    graphApi.getGraph(this, renderFunc);
   }
 
   function clear() {
     d3.select("svg").selectAll("*").remove();
   }
 
-  function iterate() {
-    $.ajax({
-      method: "GET",
-      url: domain + '/iterate',
-      dataType: "text",
-      crossDomain: true,
-    }).done(function (data) { console.log(data); });
-  }
-
-  function create(x, y) {
-    $.ajax({
-      method: "GET",
-      url: domain + '/create/' + x + ',' + y,
-      dataType: "text",
-      crossDomain: true
-    }).done(function (data) { console.log(data); });
-  }
-
   return {
-    create: create,
     render: render,
     clear: clear,
-    iterate: iterate,
   };
 }());
