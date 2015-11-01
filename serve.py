@@ -20,8 +20,8 @@ def _get_network():
     if 'network' in state:
         return state['network']
     elif 'network' in db:
-        json = db.get('network')
-        network = ought_ext.Network(json)
+        network_json = db.get('network')
+        network = ought_ext.Network(network_json)
         state['network'] = network
         return network
     else:
@@ -38,10 +38,25 @@ def describe():
     return _get_network().to_json()
 
 
+@app.route("/prelaid")
+def describe_prelaid():
+    d3_json = _get_network().to_json()
+    d3_dict = json.loads(d3_json)
+    nx_graph = graph_algs.d3_to_nx(d3_dict)
+    layout = graph_algs.get_layout(nx_graph)
+    for name, position in layout.items():
+        # Scale position to lie in [0, 1]
+        p = 0.5 * (position + 1.0)
+        nx_graph.node[name]['x'] = p[0]
+        nx_graph.node[name]['y'] = p[1]
+    json_str = json.dumps(graph_algs.nx_to_d3(nx_graph))
+    return json_str
+
+
 @app.route("/create/<int:x>,<int:y>")
 def create(x, y):
     initial_state = np.random.randint(0, 2, size=[x, y])
-    nx_graph = graph_algs.get_periodic_two_dim_lattice(initial_state)
+    nx_graph = graph_algs.get_periodic_two_dim_square_lattice(initial_state)
     data = graph_algs.nx_to_d3(nx_graph)
     data_json = json.dumps(data)
     network = ought_ext.Network(data_json)
@@ -51,7 +66,7 @@ def create(x, y):
 
 @app.route("/iterate")
 def iterate():
-    _get_network().iterate()
+    _get_network().iterate(1)
     return 'Network iterated successfully'
 
 

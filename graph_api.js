@@ -14,6 +14,16 @@ var graphApi = (function () {
     }).done(callback);
   }
 
+  function getGraphPrelaid(context, callback) {
+    $.ajax({
+      context: context,
+      method: "GET",
+      url: domain + '/prelaid',
+      dataType: "json",
+      crossDomain: crossDomain
+    }).done(callback);
+  }
+
   function iterate() {
     $.ajax({
       method: "GET",
@@ -36,5 +46,6 @@ var graphApi = (function () {
     create: create,
     iterate: iterate,
     getGraph: getGraph,
+    getGraphPrelaid: getGraphPrelaid,
   };
 }());

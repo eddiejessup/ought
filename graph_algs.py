@@ -1,5 +1,7 @@
 from __future__ import print_function, division
 import networkx as nx
+from networkx.readwrite import json_graph
+import json
 
 
 def get_i_x_y(i_x, i_y, n_y):
@@ -57,8 +59,9 @@ def get_periodic_two_dim_hex_lattice(initial_state):
     g = nx.DiGraph()
     for i_x in range(n_x):
         for i_y in range(n_y):
+            name = "({}, {})".format(i_x, i_y)
             state = initial_state[i_x, i_y]
-            g.add_node((i_x, i_y), state=state, name=(i_x, i_y))
+            g.add_node((i_x, i_y), state=state, name=name)
 
     for i_x in range(n_x):
         for i_y in range(n_y):
@@ -81,8 +84,6 @@ def get_periodic_two_dim_hex_lattice(initial_state):
                     i_y_d += n_y
                     # continue
                 g.add_edge((i_x, i_y), (i_x_d, i_y_d))
-    for n, d in g.nodes(data=True):
-        print(n, d)
     return g
 
 
@@ -93,17 +94,15 @@ def augment_nx(g):
 
 
 def nx_to_d3(g):
-    keys_and_data = g.nodes(data=True)
-    keys, nx_data = zip(*keys_and_data)
-    key_to_index = {key: index for index, key in enumerate(keys)}
-    d3_data = {'nodes': [], 'links': []}
-    for key_source, nx_data_source in keys_and_data:
-        index_source = key_to_index[key_source]
-        d3_data['nodes'].append({"name": str(key_source),
-                                 "index": index_source,
-                                 "state": int(nx_data_source['state'])})
-        for key_target in g.neighbors(key_source):
-            index_target = key_to_index[key_target]
-            d3_data['links'].append({'source': index_source,
-                                     'target': index_target})
-    return d3_data
+    json_dict = json_graph.node_link_data(g)
+    for i, node in enumerate(json_dict['nodes']):
+        node['index'] = i
+    return json_dict
+
+
+def d3_to_nx(json_dict):
+    return json_graph.node_link_graph(json_dict)
+
+
+def get_layout(g):
+    return nx.spring_layout(g, iterations=100)

@@ -71,33 +71,33 @@ void State::uncache() {
     this->cached_label = -1;
 }
 
-// auto State::transition_func(int self_label, vector<int> labels) {
-//     const auto num_alive_for_birth = 3;
-//     const auto min_num_alive = 2;
-//     const auto max_num_alive = 3;
+auto State::transition_func(int self_label, vector<int> labels) {
+    const auto num_alive_for_birth = 3;
+    const auto min_num_alive = 2;
+    const auto max_num_alive = 3;
 
-//     const auto label_alive = 1;
-//     const auto label_dead = 0;
+    const auto label_alive = 1;
+    const auto label_dead = 0;
 
-//     auto num_alive = 0;
-//     for (auto label : labels) {
-//         num_alive += label == label_alive ? 1 : 0;
-//     }
+    auto num_alive = 0;
+    for (auto label : labels) {
+        num_alive += label == label_alive ? 1 : 0;
+    }
 
-//     if (self_label == label_alive) {
-//         if ((num_alive < min_num_alive) || (num_alive > max_num_alive)) {
-//             return label_dead;
-//         } else {
-//             return label_alive;
-//         }
-//     } else {
-//         if (num_alive == num_alive_for_birth) {
-//             return label_alive;
-//         } else {
-//             return label_dead;
-//         }
-//     }
-// }
+    if (self_label == label_alive) {
+        if ((num_alive < min_num_alive) || (num_alive > max_num_alive)) {
+            return label_dead;
+        } else {
+            return label_alive;
+        }
+    } else {
+        if (num_alive == num_alive_for_birth) {
+            return label_alive;
+        } else {
+            return label_dead;
+        }
+    }
+}
 
 // auto State::transition_func(int self_label, vector<int> labels) {
 //    if (labels.size() == 0) {
@@ -107,9 +107,9 @@ void State::uncache() {
 //    }
 // }
 
-auto State::transition_func(int self_label, vector<int> labels) {
-   return (self_label + 1) % 10;
-}
+// auto State::transition_func(int self_label, vector<int> labels) {
+//    return (self_label + 1) % 10;
+// }
 
 void State::iterate(const vector<State>& friend_states) {
     vector<int> cached_labels;
@@ -179,18 +179,21 @@ void Node::iterate() {
 }
 
 Network::Network(string json) {
-    rapidjson::Document jsonDoc;
-    jsonDoc.Parse(json.c_str());
+    rapidjson::Document json_doc;
+    json_doc.Parse(json.c_str());
+    const rapidjson::Value& nodes_json {json_doc["nodes"]};
+    nodes.resize(nodes_json.Size());
+
     // Rapidjson does not support range expressions
-    const rapidjson::Value& nodes_json = jsonDoc["nodes"];
     for (rapidjson::SizeType i = 0; i < nodes_json.Size(); i++) {
         string name = nodes_json[i]["name"].GetString();
         int state_label = nodes_json[i]["state"].GetInt();
-        State state { state_label };
+        int index = nodes_json[i]["index"].GetInt();
+        State state {state_label};
         shared_ptr<Node> node {new Node {name, state}};
-        nodes.push_back(node);
+        nodes[index] = node;
     }
-    const rapidjson::Value& links_json = jsonDoc["links"];
+    const rapidjson::Value& links_json {json_doc["links"]};
     for (rapidjson::SizeType i = 0; i < links_json.Size(); i++) {
         int source = links_json[i]["source"].GetInt();
         int target = links_json[i]["target"].GetInt();
@@ -211,60 +214,61 @@ auto Network::get_names() const {
 }
 
 string Network::to_json() const {
-    rapidjson::Document jsonDoc;
-    jsonDoc.SetObject();
-    rapidjson::Document::AllocatorType& allocator = jsonDoc.GetAllocator();
+    rapidjson::Document json_doc;
+    json_doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = json_doc.GetAllocator();
 
-    rapidjson::Value nodes_array(rapidjson::kArrayType);
+    rapidjson::Value nodes_array {rapidjson::kArrayType};
 
     for (int node_index = 0; node_index != this->nodes.size(); ++node_index) {
-        rapidjson::Value objValue;
-        objValue.SetObject();
+        rapidjson::Value obj_value;
+        obj_value.SetObject();
         auto node = this->nodes[node_index];
 
-        rapidjson::Value name_key("name", jsonDoc.GetAllocator());
-        rapidjson::Value name_val(node->get_name().c_str(), jsonDoc.GetAllocator());
-        objValue.AddMember(name_key, name_val, jsonDoc.GetAllocator());
+        rapidjson::Value name_key {"name", json_doc.GetAllocator()};
+        rapidjson::Value name_val {node->get_name().c_str(), json_doc.GetAllocator()};
+        obj_value.AddMember(name_key, name_val, json_doc.GetAllocator());
 
-        rapidjson::Value id_key("id", jsonDoc.GetAllocator());
-        objValue.AddMember(id_key, name_val, jsonDoc.GetAllocator());
+        rapidjson::Value id_key {"id", json_doc.GetAllocator()};
+        rapidjson::Value id_val {node->get_name().c_str(), json_doc.GetAllocator()};
+        obj_value.AddMember(id_key, id_val, json_doc.GetAllocator());
 
-        rapidjson::Value index_key("index", jsonDoc.GetAllocator());
-        rapidjson::Value node_index_val(node_index);
-        objValue.AddMember(index_key, node_index_val, jsonDoc.GetAllocator());
+        rapidjson::Value index_key {"index", json_doc.GetAllocator()};
+        rapidjson::Value node_index_val {node_index};
+        obj_value.AddMember(index_key, node_index_val, json_doc.GetAllocator());
 
-        rapidjson::Value state_key("state", jsonDoc.GetAllocator());
-        rapidjson::Value state_val(node->get_label());
-        objValue.AddMember(state_key, state_val, jsonDoc.GetAllocator());
+        rapidjson::Value state_key {"state", json_doc.GetAllocator()};
+        rapidjson::Value state_val {node->get_label()};
+        obj_value.AddMember(state_key, state_val, json_doc.GetAllocator());
 
-        nodes_array.PushBack(objValue, allocator);
+        nodes_array.PushBack(obj_value, allocator);
     }
 
-    jsonDoc.AddMember("nodes", nodes_array, allocator);
+    json_doc.AddMember("nodes", nodes_array, allocator);
 
-    rapidjson::Value links_array(rapidjson::kArrayType);
+    rapidjson::Value links_array {rapidjson::kArrayType};
 
     auto names = this->get_names();
     for (int node_index = 0; node_index != this->nodes.size(); ++node_index) {
         auto node = this->nodes[node_index];
         for (auto friend_cur : node->get_friends()) {
-            rapidjson::Value objValue;
-            objValue.SetObject();
+            rapidjson::Value obj_value;
+            obj_value.SetObject();
 
             int friend_index = index_of(friend_cur.get_name(), names);
 
-            objValue.AddMember("source", node_index, allocator);
-            objValue.AddMember("target", friend_index, allocator);
+            obj_value.AddMember("source", node_index, allocator);
+            obj_value.AddMember("target", friend_index, allocator);
 
-            links_array.PushBack(objValue, allocator);
+            links_array.PushBack(obj_value, allocator);
         }
     }
 
-    jsonDoc.AddMember("links", links_array, allocator);
+    json_doc.AddMember("links", links_array, allocator);
 
     rapidjson::StringBuffer str_buf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(str_buf);
-    jsonDoc.Accept(writer);
+    rapidjson::Writer<rapidjson::StringBuffer> writer {str_buf};
+    json_doc.Accept(writer);
 
     return str_buf.GetString();
 }
